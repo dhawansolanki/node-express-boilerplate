@@ -3,7 +3,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const errorHandler = require("./middlewares/errorHandler");
 const logger = require("./middlewares/logger");
+const authController = require("./controllers/authController");
+const demoRoute = require("./routes/demo");
 require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 5050;
 
@@ -13,17 +16,18 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(logger); // Logging middleware
 
-app.get("/", (request, response) => {
-  response.json({ info: "Node.js, Express, and Postgres API" });
+// Routes
+app.get("/", (req, res) => {
+  res.json({ info: "Node.js, Express, and Postgres API" });
 });
 
-const demoRoute = require("./routes/demo");
-app.use("/demo", demoRoute);
+app.use("/demo", authController.verifyToken, demoRoute);
 
 // Error handling middleware
 app.use(errorHandler);
